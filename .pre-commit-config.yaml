@@ -3,12 +3,12 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
-        stages: [pre-push]
+        stages: [pre-commit, pre-push]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.2
+    rev: v0.15.20
     hooks:
       - id: ruff
         stages: [pre-push]
       - id: ruff-format
-        stages: [pre-push]
+        stages: [pre-commit, pre-push]
