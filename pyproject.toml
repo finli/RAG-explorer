@@ -1,5 +1,5 @@
 [project]
-name = "RAG Skincare"
+name = "RAG-explorer"
 version = "1.0.0"
 
 dependencies = [
@@ -14,3 +14,11 @@ dev = [
     "black==26.5.1", 
     "pre_commit==4.6.0", 
     "ruff==0.15.20"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["W"]
