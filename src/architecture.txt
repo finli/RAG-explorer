@@ -1,0 +1,36 @@
+src/
+    data_prep/
+        __init__.py
+        cleaning.py          # wash_post, csv_to_json
+        chunking.py          # to_chunk
+        embedding.py         # build_vector_index
+        combine.py           # combine_metadata_files, combine_faiss_indexes
+
+    vector_store/
+        __init__.py
+        faiss_io.py          # load_faiss_index, save_index
+        retrieval.py         # retrieve()
+
+    agent/
+        __init__.py
+        intent.py            # classify_intent()
+        router.py            # route_intent()
+        tasks.py             # summarize(), analyze(), recommend()
+        agent.py             # main agent()
+
+    validation/
+        __init__.py
+        grounding.py         # validate()
+        scoring.py           # confidence scoring
+        schema.py            # JSON schema validation
+
+    experiments/
+        __init__.py
+        registry.py          # save_experiment(), load_experiment()
+        config.py            # experiment config objects
+
+    ui/
+        __init__.py
+        app.py               # Streamlit UI (optional)
+
+run.py                      # orchestrates everything
