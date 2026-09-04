@@ -1,66 +1,27 @@
-"""
-Chunk the text, embed, and then store in a vector database.
-"""
+"""Embed data, store in FAISS index, store metadata in .json file."""
 
 import json
 from pathlib import Path
 
 import faiss
 import numpy as np
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 
 
-def to_chunk(file: str, chunk_size: int, chunk_overlap: int):
-    """
-    Break data into chunks with overlap, save chunks.
-    """
-
-    # Output file name
-    path = Path(file)
-    out_file = Path("data/chunks") / f"{path.stem}_chunks.jsonl"
-
-    with open(file) as json_file, open(out_file, "w", encoding="utf-8") as out:
-        splitter = RecursiveCharacterTextSplitter(
-            chunk_size=400, chunk_overlap=80, separators=["\n", ""]
-        )
-
-        for json_str in json_file:
-            line = json.loads(json_str)
-            post = line.get("post", "")
-
-            # Skip empty posts
-            if not post.strip():
-                continue
-
-            chunks = splitter.split_text(post)
-            # Save each chunk with metadata
-            for i, chunk in enumerate(chunks):
-                chunk_doc = {
-                    "chunk_id": f"{line.get('id')}_chunk_{i}",
-                    "parent_id": line.get("id"),
-                    "title": line.get("title", ""),
-                    "post_chunk": chunk,
-                    "time_utc": line.get("time_utc"),
-                    "upvote": line.get("upvote"),
-                    "num_comments": line.get("num_comments"),
-                    "source": line.get("source"),
-                    "urls": line.get("urls", []),
-                }
-
-                out.write(json.dumps(chunk_doc, ensure_ascii=False) + "\n")
-
-
 def build_vector_index(chunked_jsonl: str, embedding_model: SentenceTransformer):
-    """
-    Build a FAISS index from chunked JSONL.
-    Steps:
-        1. Load chunked JSONL
-        2. Embed each chunk
-        3. Add vector + metadata to FAISS
-        4. Save FAISS index + metadata JSON
-    """
+    """Build a FAISS index and metadata file from chunked JSONL input.
 
+    This function loads each text chunk, generates embeddings, stores them in a
+    FAISS index, and writes a corresponding metadata JSON file containing vector
+    IDs and chunk attributes.
+
+    Args:
+        chunked_jsonl (str): Path to the chunked JSONL file.
+        embedding_model (SentenceTransformer): Model used to generate embeddings.
+
+    Returns:
+        None
+    """
     # --- Prepare output paths
     path = Path(chunked_jsonl)
     out_dir = Path("data/vector_index")

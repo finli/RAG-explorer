@@ -1,3 +1,5 @@
+"""Clean csv reddit files and convert to json."""
+
 import csv
 import json
 import re
@@ -6,7 +8,14 @@ from pathlib import Path
 
 
 def wash_post(post: str):
+    """Clean reddit posts by replacing unicode, newlines, and removing urls.
 
+    Args:
+        post (str): The post from Reddit.
+
+    Returns:
+        str: Cleaned reddit post.
+    """
     # --- Unicode normalization (safe, no escape corruption)
     post = unicodedata.normalize("NFKC", post)
 
@@ -25,8 +34,6 @@ def wash_post(post: str):
     # Collapse multiple newlines → single newline
     post = re.sub(r"\n\s*\n+", "\n", post)
 
-    # Strip markdown (or convert to plain text)
-
     # take urls out of post
     post = re.sub(r"https?://\S+", "[URL]", post)
 
@@ -34,10 +41,11 @@ def wash_post(post: str):
 
 
 def csv_to_jsonl(csv_file: str):
-    """
-    Convert csv file to jsonl for LangChain.
-    """
+    """Convert csv file to jsonl for LangChain.
 
+    Args:
+        csv_file (str): Filename of csv.
+    """
     # get filename without extension or folder
     filename = Path(csv_file)
     out_name = filename.stem  # filename without extension

@@ -8,8 +8,7 @@ src/
 
     vector_store/
         __init__.py
-        faiss_io.py          # load_faiss_index, save_index
-        retrieval.py         # retrieve()
+        retrieval.py         # retrieve(), load_faiss_index, save_index
 
     agent/
         __init__.py

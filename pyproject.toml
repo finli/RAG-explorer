@@ -13,12 +13,29 @@ dependencies = [
 dev = [
     "black==26.5.1", 
     "pre_commit==4.6.0", 
-    "ruff==0.15.20"]
+    "ruff==0.15.20",
+    "flake8-pyproject==1.2.3"
+]
 
 [tool.ruff]
 line-length = 88
 target-version = "py313"
 
+
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP", "SIM"]
-ignore = ["W"]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # bugbear
+    "UP",  # pyupgrade
+    "SIM", # simplify
+    "D",   # pydocstyle (docstring rules)
+]
+ignore = [
+    "D203", # allow blank line before class docstring
+    "D213", # allow multi-line docstring summary on separate line
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

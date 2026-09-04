@@ -1,74 +1,26 @@
-import json
-import os
-from pathlib import Path
+"""Orchestrates data prep: cleaning, chunking, embedding and combining outputs."""
 
-import faiss
+import os
+
 from sentence_transformers import SentenceTransformer
 
-from to_doc import csv_to_jsonl
-from to_vector import build_vector_index, to_chunk
-
-
-def combine_metadata_files(input_dir: str, output_file: str):
-    input_dir = Path(input_dir)
-    output_path = Path(output_file)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    combined = []
-    global_id = 0
-
-    for entry in os.scandir(input_dir):
-        if not entry.is_file() or not entry.name.endswith(".json"):
-            continue
-
-        print(f"Reading JSON array: {entry.name}")
-
-        with open(entry.path, encoding="utf-8") as f:
-            data = json.load(f)  # load entire JSON array
-
-            for obj in data:
-                obj["vector_id"] = global_id
-                global_id += 1
-                combined.append(obj)
-
-    # Write combined JSON array
-    with open(output_path, "w", encoding="utf-8") as out:
-        json.dump(combined, out, ensure_ascii=False, indent=2)
-
-    print(f"Combined metadata written to {output_path}")
-    print(f"Total metadata vectors: {global_id}")
-
-
-def combine_faiss_indexes(input_dir: str, output_file: str):
-    input_dir = Path(input_dir)
-    output_path = Path(output_file)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    main_index = None
-
-    for entry in os.scandir(input_dir):
-        if not entry.is_file() or not entry.name.endswith(".faiss"):
-            continue
-
-        idx = faiss.read_index(entry.path)
-
-        if main_index is None:
-            main_index = idx
-        else:
-            main_index.merge_from(idx)
-
-    faiss.write_index(main_index, str(output_path))
-    print("Total faiss vectors:", main_index.ntotal)
+from data_prep import (
+    build_vector_index,
+    combine_faiss_indexes,
+    combine_metadata_files,
+    csv_to_jsonl,
+    to_chunk,
+)
 
 
 def prepare_data(
     model: SentenceTransformer, chunk_size: int = 400, chunk_overlap: int = 80
 ):
-    """
-    Check if work has been done (folder is empty).
-    If work undone, prepare the data.
-    """
+    """Prepare the dataset by cleaning, chunking, embedding, and combining outputs.
 
+    This function checks whether intermediate folders are empty and performs
+    the necessary processing steps only when required.
+    """
     # Clean docs, change to jsonl format
     if len(os.listdir("data/clean")) == 0:  # data/clean is empty
         print("Cleaning docs")

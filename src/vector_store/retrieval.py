@@ -1,3 +1,5 @@
+"""FAISS index loading and vector retrieval utilities for semantic search."""
+
 import json
 
 import faiss
@@ -6,6 +8,16 @@ from sentence_transformers import SentenceTransformer
 
 
 def load_faiss_index(index_path: str, metadata_path: str):
+    """Load the faiss index file and metadata file.
+
+    Args:
+        index_path (str): The filepath for the index file.
+        metadata_path (str): The filepath for the metadata file.
+
+    Returns:
+        index: A faiss index file
+        metadata: A json file of metadata matching the faiss index file
+    """
     index = faiss.read_index(index_path)
     with open(metadata_path, encoding="utf-8") as f:
         metadata = json.load(f)
@@ -13,6 +25,18 @@ def load_faiss_index(index_path: str, metadata_path: str):
 
 
 def retrieve(query: str, model: SentenceTransformer, index, metadata, k: int = 5):
+    """Retrieve top-k chunks from FAISS based on a query.
+
+    Args:
+        query (str): User query text.
+        model: Embedding model.
+        index: FAISS index.
+        metadata (list): Metadata entries.
+        k (int): Number of chunks to return.
+
+    Returns:
+        list: Retrieved chunks with scores.
+    """
     # 1. Embed query
     q_emb = model.encode(query)
     q_emb = q_emb / np.linalg.norm(q_emb)  # normalize for cosine similarity
