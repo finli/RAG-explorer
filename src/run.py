@@ -23,7 +23,7 @@ def combine_metadata_files(input_dir: str, output_file: str):
 
         print(f"Reading JSON array: {entry.name}")
 
-        with open(entry.path, "r", encoding="utf-8") as f:
+        with open(entry.path, encoding="utf-8") as f:
             data = json.load(f)  # load entire JSON array
 
             for obj in data:

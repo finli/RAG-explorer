@@ -1,4 +1,5 @@
 import json
+
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -6,7 +7,7 @@ from sentence_transformers import SentenceTransformer
 
 def load_faiss_index(index_path: str, metadata_path: str):
     index = faiss.read_index(index_path)
-    with open(metadata_path, "r", encoding="utf-8") as f:
+    with open(metadata_path, encoding="utf-8") as f:
         metadata = json.load(f)
     return index, metadata
 
@@ -22,7 +23,7 @@ def retrieve(query: str, model: SentenceTransformer, index, metadata, k: int = 5
 
     # 3. Fetch metadata for each result
     results = []
-    for score, idx in zip(distances[0], ids[0]):
+    for score, idx in zip(distances[0], ids[0], strict=True):
         results.append(
             {
                 "score": float(score),
