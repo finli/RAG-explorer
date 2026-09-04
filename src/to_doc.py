@@ -1,8 +1,8 @@
-import csv, json
-import os
-from pathlib import Path
+import csv
+import json
 import re
 import unicodedata
+from pathlib import Path
 
 
 def wash_post(post: str):
@@ -49,7 +49,6 @@ def csv_to_jsonl(csv_file: str):
     with open(csv_file) as f:
         reader = csv.DictReader(f)
         for row in reader:
-
             post = row["post"]
 
             # Remove repeated boilerplate
@@ -57,13 +56,13 @@ def csv_to_jsonl(csv_file: str):
                 "Today is Casual Friday",
                 "If you're new to SkincareAddiction: welcome",
                 "Asian Beauty isn’t ALL about skincare",
-                "Post all of your deals, memes, gifs, hauls, sheet mask selfies, and other fluff.", 
-                "Hello and welcome to the Daily Help Thread", 
-                "Have a rant about your routine or beauty products", 
+                "Post all of your deals, memes, gifs, hauls, sheet mask selfies,",
+                "Hello and welcome to the Daily Help Thread",
+                "Have a rant about your routine or beauty products",
                 "It’s the Weekly Random Chat Post! ",
                 "Frustrated and need to rant",
-                "seen several comments about the same old same", 
-                "kick off the month with a thread to keep purchases in check", 
+                "seen several comments about the same old same",
+                "kick off the month with a thread to keep purchases in check",
                 "Welcome to our WITW Shopping Guide series",
                 "discuss the anti-haul, where more",
             ]
@@ -94,10 +93,3 @@ def csv_to_jsonl(csv_file: str):
     with open(out_path, "w", encoding="utf-8") as out:
         for d in docs:
             out.write(json.dumps(d, ensure_ascii=False) + "\n")
-
-obj = os.scandir("data/raw")
-for entry in obj:
-    if entry.is_file():
-        csv_to_jsonl(entry)
-
-    

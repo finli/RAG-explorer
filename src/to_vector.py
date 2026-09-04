@@ -2,17 +2,16 @@
 Chunk the text, embed, and then store in a vector database.
 """
 
-import os
+import json
 from pathlib import Path
 
 import faiss
-import json
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 import numpy as np
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 
 
-def to_chunk(file: str):
+def to_chunk(file: str, chunk_size: int, chunk_overlap: int):
     """
     Break data into chunks with overlap, save chunks.
     """
@@ -21,8 +20,7 @@ def to_chunk(file: str):
     path = Path(file)
     out_file = Path("data/chunks") / f"{path.stem}_chunks.jsonl"
 
-    with open(file, "r") as json_file, open(out_file, "w", encoding="utf-8") as out:
-
+    with open(file) as json_file, open(out_file, "w", encoding="utf-8") as out:
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=400, chunk_overlap=80, separators=["\n", ""]
         )
@@ -39,7 +37,7 @@ def to_chunk(file: str):
             # Save each chunk with metadata
             for i, chunk in enumerate(chunks):
                 chunk_doc = {
-                    "chunk_id": f"{line.get("id")}_chunk_{i}",
+                    "chunk_id": f"{line.get('id')}_chunk_{i}",
                     "parent_id": line.get("id"),
                     "title": line.get("title", ""),
                     "post_chunk": chunk,
@@ -77,7 +75,7 @@ def build_vector_index(chunked_jsonl: str, embedding_model: SentenceTransformer)
     metadata = []
 
     # --- Load chunked JSONL
-    with open(chunked_jsonl, "r") as f:
+    with open(chunked_jsonl) as f:
         for vector_id, json_str in enumerate(f):
             line = json.loads(json_str)
 
@@ -113,17 +111,3 @@ def build_vector_index(chunked_jsonl: str, embedding_model: SentenceTransformer)
     faiss.write_index(index, str(index_path))
     with open(metadata_path, "w", encoding="utf-8") as out:
         json.dump(metadata, out, ensure_ascii=False, indent=2)
-
-
-obj = os.scandir("data/clean")
-for entry in obj:
-    if entry.is_file():
-        to_chunk(entry)
-
-# Create the model once
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-
-obj = os.scandir("data/chunks")
-for entry in obj:
-    if entry.is_file():
-        build_vector_index(entry, model)
