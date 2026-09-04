@@ -11,12 +11,6 @@ Ollama (LLM)
 LangChain
 Streamlit (optional UI) 
 
-In your README, write:
-
-
-tradeoffs (quality vs cost)
-limitations
-
 Architecture:
 User query
    ↓
@@ -38,6 +32,7 @@ Final output
 
 
 Step 0: Dataset
+https://github.com/salice/reddit_skincare_classification/blob/master/data/scrape-23-10-27_skincareaddiction.csv
 Pick something like:
 
 Raw CSV
