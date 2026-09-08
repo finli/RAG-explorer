@@ -13,12 +13,11 @@ dependencies = [
 dev = [
     "black==26.5.1", 
     "pre_commit==4.6.0", 
-    "ruff==0.15.20",
-    "flake8-pyproject==1.2.3"
+    "ruff==0.15.20"
 ]
 
 [tool.ruff]
-line-length = 88
+line-length = 90
 target-version = "py313"
 
 

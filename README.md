@@ -1,8 +1,5 @@
 # RAG-explorer
-A RAG system with vector search and retrieval pipeline. 
-
 A RAG-style system using FAISS for vector retrieval, with an agent-like layer that routes queries and decides how to process retrieved data. Also uses validation to ensure outputs are grounded in retrieved context. Uses local free software. 
-
 
 Stack:
 Python 
