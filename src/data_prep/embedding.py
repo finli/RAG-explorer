@@ -1,14 +1,18 @@
 """Embed data, store in FAISS index, store metadata in .json file."""
 
 import json
-from pathlib import Path
 
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
 
-def build_vector_index(chunked_jsonl: str, embedding_model: SentenceTransformer):
+def build_vector_index(
+    in_file: str,
+    out_metadata: str,
+    out_embedding: str,
+    embedding_model: SentenceTransformer,
+):
     """Build a FAISS index and metadata file from chunked JSONL input.
 
     This function loads each text chunk, generates embeddings, stores them in a
@@ -16,27 +20,20 @@ def build_vector_index(chunked_jsonl: str, embedding_model: SentenceTransformer)
     IDs and chunk attributes.
 
     Args:
-        chunked_jsonl (str): Path to the chunked JSONL file.
+        in_file (str): Path to the chunked JSONL file.
+        out_metadata (str): Filename of the JSONL medata output file
+        out_embedding (str): Filename of the embedding output file.
         embedding_model (SentenceTransformer): Model used to generate embeddings.
-
-    Returns:
-        None
     """
-    # --- Prepare output paths
-    path = Path(chunked_jsonl)
-    out_dir = Path("data/vector_index")
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    index_path = out_dir / f"{path.stem}.faiss"
-    metadata_path = out_dir / f"{path.stem}_metadata.json"
-
     # --- Create FAISS index (L2 or cosine)
     dim = embedding_model.get_embedding_dimension()
-    index = faiss.IndexFlatIP(dim)
+
+    index = faiss.IndexFlatL2(dim)
+
     metadata = []
 
     # --- Load chunked JSONL
-    with open(chunked_jsonl) as f:
+    with open(in_file) as f:
         for vector_id, json_str in enumerate(f):
             line = json.loads(json_str)
 
@@ -46,8 +43,11 @@ def build_vector_index(chunked_jsonl: str, embedding_model: SentenceTransformer)
 
             # --- Embed
             emb = embedding_model.encode(text)
-            emb = emb / np.linalg.norm(emb)  # normalize for cosine similarity
             emb = np.array([emb], dtype="float32")
+
+            # emb = embedding_model.encode(text)
+            # emb = emb / np.linalg.norm(emb)  # normalize for cosine similarity
+            # emb = np.array([emb], dtype="float32")
 
             # --- Add to FAISS
             index.add(emb)
@@ -69,6 +69,7 @@ def build_vector_index(chunked_jsonl: str, embedding_model: SentenceTransformer)
             )
 
     # --- Save FAISS + metadata
-    faiss.write_index(index, str(index_path))
-    with open(metadata_path, "w", encoding="utf-8") as out:
-        json.dump(metadata, out, ensure_ascii=False, indent=2)
+    faiss.write_index(index, out_embedding)
+    with open(out_metadata, "w", encoding="utf-8") as out:
+        for doc in metadata:
+            out.write(json.dumps(doc, ensure_ascii=False) + "\n")
