@@ -64,18 +64,3 @@ def retrieve(query: str, model: SentenceTransformer, index, metadata, k: int = 5
         )
 
     return results
-
-
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-
-index, metadata = load_faiss_index(
-    index_path="data/vector_index/all_vectors.faiss",
-    metadata_path="data/vector_index/all_metadata.jsonl",
-)
-results = retrieve(
-    "I got IPL to fix the sun damage on my arms, this is what my experience was like.",
-    model=model,
-    index=index,
-    metadata=metadata,
-)
-print(results)
