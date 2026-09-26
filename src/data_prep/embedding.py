@@ -43,11 +43,8 @@ def build_vector_index(
 
             # --- Embed
             emb = embedding_model.encode(text)
+            emb = emb / np.linalg.norm(emb)  # normalize for cosine similarity
             emb = np.array([emb], dtype="float32")
-
-            # emb = embedding_model.encode(text)
-            # emb = emb / np.linalg.norm(emb)  # normalize for cosine similarity
-            # emb = np.array([emb], dtype="float32")
 
             # --- Add to FAISS
             index.add(emb)

@@ -1,10 +1,10 @@
 src/
     data_prep/
         __init__.py
-        cleaning.py          # wash_post, csv_to_json
+        deduplicate.py       # remove_duplicates
+        cleaning.py          # clean, clean_field
         chunking.py          # to_chunk
         embedding.py         # build_vector_index
-        combine.py           # combine_metadata_files, combine_faiss_indexes
 
     vector_store/
         __init__.py

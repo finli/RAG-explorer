@@ -2,7 +2,6 @@
 
 from .chunking import to_chunk
 from .cleaning import clean
-from .combine import combine_faiss_indexes, combine_metadata_files
 from .deduplicate import remove_duplicates
 from .embedding import build_vector_index
 

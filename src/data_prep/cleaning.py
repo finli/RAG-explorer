@@ -4,6 +4,21 @@ import json
 import re
 import unicodedata
 
+boilerplate = [
+    "Today is Casual Friday",
+    "If you're new to SkincareAddiction: welcome",
+    "Asian Beauty isn’t ALL about skincare",
+    "Post all of your deals, memes, gifs, hauls, sheet mask selfies,",
+    "Hello and welcome to the Daily Help Thread",
+    "Have a rant about your routine or beauty products",
+    "It’s the Weekly Random Chat Post! ",
+    "Frustrated and need to rant",
+    "seen several comments about the same old same",
+    "kick off the month with a thread to keep purchases in check",
+    "Welcome to our WITW Shopping Guide series",
+    "discuss the anti-haul, where more",
+]
+
 
 def clean_field(field: str):
     """Clean reddit field by replacing unicode, newlines, and removing urls.
@@ -54,7 +69,8 @@ def clean(input_file: str, output_file: str):
             post = jsonl["post"]
 
             # if field is very short, skip appending
-            if len(str(post).strip()) < 2:
+            # if post contains daily post, skip appending
+            if len(str(post).strip()) < 2 or any(b in post for b in boilerplate):
                 continue
 
             # Take urls out of field and add to "urls "

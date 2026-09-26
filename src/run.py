@@ -10,8 +10,7 @@ from data_prep import (
     remove_duplicates,
     to_chunk,
 )
-
-# from vector_store import retrieve, load_faiss_index
+from vector_store import load_faiss_index, retrieve
 
 
 def prepare_data(
@@ -39,15 +38,15 @@ def prepare_data(
             chunk_overlap=chunk_overlap,
         )
 
-    # Embed, save as vector, and metadata if either file isn't written
+    # Embed, save vector and metadata if either file isn't written
     metadata_file = Path("data/vector_metadata.jsonl")
     faiss_file = Path("data/vector.faiss")
 
     if not metadata_file.exists() or not faiss_file.exists():
         build_vector_index(
             in_file="data/chunks.jsonl",
-            out_embedding="data/vector.faiss",
-            out_metadata="data/vector_metadata.jsonl",
+            out_embedding=str(faiss_file),
+            out_metadata=str(metadata_file),
             embedding_model=model,
         )
 
@@ -58,11 +57,11 @@ model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 # Clean, chunk, and embed data
 prepare_data(model=model)
 
-"""
+
 # Get answers
 index, metadata = load_faiss_index(
-    index_path="data/vector_index/all_vectors.faiss",
-    metadata_path="data/vector_index/all_metadata.jsonl",
+    index_file="data/vector.faiss",
+    metadata_file="data/vector_metadata.jsonl",
 )
 
 results = retrieve(
@@ -71,5 +70,4 @@ results = retrieve(
     index=index,
     metadata=metadata,
 )
-#print(results)
-"""
+print(results)

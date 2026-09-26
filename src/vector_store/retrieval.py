@@ -7,20 +7,22 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 
 
-def load_faiss_index(index_path: str, metadata_path: str):
+def load_faiss_index(index_file: str, metadata_file: str):
     """Load the faiss index file and metadata file.
 
     Args:
-        index_path (str): The filepath for the index file.
-        metadata_path (str): The filepath for the metadata file.
+        index_file (str): The filepath for the index file.
+        metadata_file (str): The filepath for the metadata file.
 
     Returns:
         index: A faiss index file
-        metadata: A json file of metadata matching the faiss index file
+        metadata: A list of metadata
     """
-    index = faiss.read_index(index_path)
-    with open(metadata_path, encoding="utf-8") as f:
-        metadata = json.load(f)
+    index = faiss.read_index(index_file)
+
+    with open(metadata_file, encoding="utf-8") as f:
+        metadata = [json.loads(line) for line in f]
+
     return index, metadata
 
 
@@ -47,7 +49,9 @@ def retrieve(query: str, model: SentenceTransformer, index, metadata, k: int = 5
 
     # 3. Fetch metadata for each result
     results = []
+
     for score, idx in zip(distances[0], ids[0], strict=True):
+        print("score", score, "index", idx)
         results.append(
             {
                 "score": float(score),
