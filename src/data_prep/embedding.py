@@ -28,7 +28,7 @@ def build_vector_index(
     # --- Create FAISS index (L2 or cosine)
     dim = embedding_model.get_embedding_dimension()
 
-    index = faiss.IndexFlatL2(dim)
+    index = faiss.IndexFlatIP(dim)
 
     metadata = []
 

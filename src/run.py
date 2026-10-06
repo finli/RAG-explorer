@@ -10,7 +10,7 @@ from data_prep import (
     remove_duplicates,
     to_chunk,
 )
-from vector_store import load_faiss_index, retrieve
+from vector_store import filter_results, load_faiss_index, retrieve
 
 
 def prepare_data(
@@ -70,4 +70,8 @@ results = retrieve(
     index=index,
     metadata=metadata,
 )
-print(results)
+print("resutls", results)
+
+filtered_results = filter_results(results, score_threshold=0.4)
+
+print("filtered_results", filtered_results)

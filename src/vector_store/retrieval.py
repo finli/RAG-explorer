@@ -1,6 +1,7 @@
 """FAISS index loading and vector retrieval utilities for semantic search."""
 
 import json
+from typing import Any
 
 import faiss
 import numpy as np
@@ -45,12 +46,12 @@ def retrieve(query: str, model: SentenceTransformer, index, metadata, k: int = 5
     q_emb = np.array([q_emb], dtype="float32")
 
     # 2. Search FAISS
-    distances, ids = index.search(q_emb, k)
-
+    similarities, ids = index.search(q_emb, k)
+    print(similarities, ids)
     # 3. Fetch metadata for each result
     results = []
 
-    for score, idx in zip(distances[0], ids[0], strict=True):
+    for score, idx in zip(similarities[0], ids[0], strict=True):
         print("score", score, "index", idx)
         results.append(
             {
@@ -68,3 +69,14 @@ def retrieve(query: str, model: SentenceTransformer, index, metadata, k: int = 5
         )
 
     return results
+
+
+def filter_results(results: list[dict[str, Any]], score_threshold: float):
+    """Filter top-k chunks so only good scores are passed to LLM.
+
+    Args:
+        results (list[dict[str, Any]]): the top_k results that match the query
+        score_threshold (float): A number between 0 and 1 that determines which results
+            are useful to return.
+    """
+    return [result for result in results if result["score"] >= score_threshold]
