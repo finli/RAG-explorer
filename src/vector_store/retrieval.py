@@ -1,11 +1,12 @@
 """FAISS index loading and vector retrieval utilities for semantic search."""
 
 import json
-from typing import Any
 
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
+
+from .models import RetrievalResult
 
 
 def load_faiss_index(index_file: str, metadata_file: str):
@@ -52,31 +53,30 @@ def retrieve(query: str, model: SentenceTransformer, index, metadata, k: int = 5
     results = []
 
     for score, idx in zip(similarities[0], ids[0], strict=True):
-        print("score", score, "index", idx)
         results.append(
-            {
-                "score": float(score),
-                "chunk_id": metadata[idx]["chunk_id"],
-                "parent_id": metadata[idx]["parent_id"],
-                "title": metadata[idx]["title"],
-                "text": metadata[idx]["text"],
-                "urls": metadata[idx]["urls"],
-                "time_utc": metadata[idx]["time_utc"],
-                "upvote": metadata[idx]["upvote"],
-                "num_comments": metadata[idx]["num_comments"],
-                "source": metadata[idx]["source"],
-            }
+            RetrievalResult(
+                score=float(score),
+                chunk_id=metadata[idx]["chunk_id"],
+                parent_id=metadata[idx]["parent_id"],
+                title=metadata[idx]["title"],
+                text=metadata[idx]["text"],
+                urls=metadata[idx]["urls"],
+                time_utc=metadata[idx]["time_utc"],
+                upvote=metadata[idx]["upvote"],
+                num_comments=metadata[idx]["num_comments"],
+                source=metadata[idx]["source"],
+            )
         )
 
     return results
 
 
-def filter_results(results: list[dict[str, Any]], score_threshold: float):
+def filter_results(results: list[RetrievalResult], score_threshold: float):
     """Filter top-k chunks so only good scores are passed to LLM.
 
     Args:
-        results (list[dict[str, Any]]): the top_k results that match the query
+        results (list[RetrievelResult]): the top_k results that match the query
         score_threshold (float): A number between 0 and 1 that determines which results
             are useful to return.
     """
-    return [result for result in results if result["score"] >= score_threshold]
+    return [result for result in results if result.score >= score_threshold]
