@@ -1,0 +1,48 @@
+src/
+    data_prep/
+        __init__.py
+        deduplicate.py       # remove_duplicates
+        cleaning.py          # clean, clean_field
+        chunking.py          # to_chunk
+        embedding.py         # build_vector_index
+
+    vector_store/
+        __init__.py
+        retrieval.py         # retrieve(), load_faiss_index, save_index
+
+
+├── rag/
+│ ├── prompt.py
+│ ├── generate.py
+│ └── answer.py
+│
+├── validation/
+│ ├── grounding.py
+│ └── scoring.py
+│
+├── evaluation/
+│ ├── metrics.py
+│ └── experiments.py
+    agent/
+        __init__.py
+        intent.py            # classify_intent()
+        router.py            # route_intent()
+        tasks.py             # summarize(), analyze(), recommend()
+        agent.py             # main agent()
+
+    validation/
+        __init__.py
+        grounding.py         # validate()
+        scoring.py           # confidence scoring
+        schema.py            # JSON schema validation
+
+    experiments/
+        __init__.py
+        registry.py          # save_experiment(), load_experiment()
+        config.py            # experiment config objects
+
+    ui/
+        __init__.py
+        app.py               # Streamlit UI (optional)
+
+run.py                      # orchestrates everything

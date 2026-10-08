@@ -2,15 +2,17 @@
 
 from pathlib import Path
 
+from ollama import chat
 from sentence_transformers import SentenceTransformer
 
-from data_prep import (
+from rag_explorer.data_prep import (
     build_vector_index,
     clean,
     remove_duplicates,
     to_chunk,
 )
-from vector_store import filter_results, load_faiss_index, retrieve
+from rag_explorer.rag.prompt import return_prompt
+from rag_explorer.vector_store import filter_results, load_faiss_index, retrieve
 
 
 def prepare_data(
@@ -64,14 +66,19 @@ index, metadata = load_faiss_index(
     metadata_file="data/vector_metadata.jsonl",
 )
 
+question = "Which product is the best for my acne?"
 results = retrieve(
-    "Which product is the best for my acne?",
+    query=question,
     model=model,
     index=index,
     metadata=metadata,
 )
-print("resutls", results)
-
 filtered_results = filter_results(results, score_threshold=0.4)
 
 print("filtered_results", filtered_results)
+
+prompt = return_prompt(filtered_results, question=question)
+messages = [{"role": "user", "content": prompt}]
+
+response = chat(model="qwen3:4b", messages=messages, think=True)
+print(response)
