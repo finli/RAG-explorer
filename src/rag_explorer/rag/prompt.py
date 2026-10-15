@@ -19,23 +19,36 @@ def return_prompt(context_list: list[RetrievalResult], query: str) -> str:
         A formatted prompt ready to be sent to the LLM.
     """
     # Change list to str
-    context = "\n\n".join(result.text for result in context_list)
+    context = ""
+
+    for result in context_list:
+        context += f"""
+        SOURCE: reddit/{result.source}
+        
+        TITLE:
+        {result.title}
+        
+        POST:
+        {result.text}
+        ---
+        """
     return f"""You are a skincare discussion assistant.
 
-    Use retrieved Reddit discussions as your primary source whenever they are available
-    and relevant.
-    If Reddit context is available:
-    - Clearly label information derived from Reddit as [Reddit].
+    Answer the question directly. 
 
-    If the context is insufficient, you may use your general knowledge, but clearly 
-    indicate which parts come from the retrieved Reddit discussions and which parts 
-    are general knowledge.
+   If the Reddit discussions contain useful information:
+        - Provide a concise answer.
+        - Mention products that appear in the discussions.
+        - Cite Reddit evidence using [Reddit].
 
-    If the context is empty, ignore the missing context and answer the question using 
-    general knowledge.
+    If the Reddit discussions do not contain enough information:
+        - Say so briefly.
+        - Then provide a short answer based on general skincare knowledge.
 
     Context:
     {context}
 
     Question:
-    {query}"""
+    {query}
+    
+    Answer:"""
