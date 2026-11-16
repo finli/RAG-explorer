@@ -56,6 +56,7 @@ def remove_duplicates(input_dir: str, output_file: str):
 
 
 boilerplate = [
+    "What are you favourite multipurpose products",
     "[META] Hello, new subscribers",
     "Today is Casual Friday",
     "If you're new to SkincareAddiction: welcome",
