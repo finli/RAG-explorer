@@ -11,20 +11,9 @@ import json
 import re
 import unicodedata
 
-# Unified schema. Every cleaned doc has the same keys
-SCHEMA = [
-    "id",
-    "title",
-    "post",
-    "source",
-    "links",
-    "doc_type",
-    "source_url",
-    "time_utc",
-    "upvote",
-    "num_comments",
-]
-# [text](url) or [text] (url)
+from ..schema import DOC_FIELDS, validate
+
+# Remove markdown from before links [text](url) or [text] (url)
 MD_LINK = re.compile(r"\[([^\]]+)\]\s?\(https?://[^)\s]+\)")
 URL = re.compile(r"https?://[^\s)\]>,]+")
 
@@ -142,5 +131,6 @@ def make_doc(
         "upvote": _num(upvote, float),
         "num_comments": _num(num_comments, int),
     }
-    assert list(doc) == SCHEMA, "doc keys drifted from SCHEMA"
+    # assert list(doc) == DOC_FIELDS, "doc keys drifted from SCHEMA"
+    validate(record=doc, fields=DOC_FIELDS)
     return doc
