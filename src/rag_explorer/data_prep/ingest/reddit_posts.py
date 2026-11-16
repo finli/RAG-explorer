@@ -1,11 +1,11 @@
 """Combine raw Reddit post csv files, deduplicate, and clean them into jsonl."""
 
-import json
 import os
 from pathlib import Path
 
 import pandas as pd
 
+from ..jsonl import read_jsonl, write_jsonl
 from . import common
 
 RENAME = {
@@ -86,28 +86,25 @@ def ingest_posts(input_file: str, output_file: str):
     """
     docs = []
 
-    with open(input_file, encoding="utf-8") as f:
-        for line in f:
-            row = json.loads(line)
+    for row in read_jsonl(input_file=input_file):
+        post = row["post"]
 
-            post = row["post"]
+        # if field is very short, skip appending
+        # if post contains daily post, skip appending
+        if len(str(post).strip()) < 2 or any(b in post for b in boilerplate):
+            continue
 
-            # if field is very short, skip appending
-            # if post contains daily post, skip appending
-            if len(str(post).strip()) < 2 or any(b in post for b in boilerplate):
-                continue
+        doc = common.make_doc(
+            title=row["title"],
+            post=post,
+            source=row["source"],
+            doc_type="post",
+            source_url=row["source_url"],
+            time_utc=float(row["time_utc"]),
+            upvote=row["upvote"],
+            num_comments=row["num_comments"],
+        )
 
-            doc = common.make_doc(
-                title=row["title"],
-                post=post,
-                source=row["source"],
-                doc_type="post",
-                source_url=row["source_url"],
-                time_utc=float(row["time_utc"]),
-                upvote=row["upvote"],
-                num_comments=row["num_comments"],
-            )
+        docs.append(doc)
 
-            docs.append(doc)
-
-        common.write_jsonl(docs, output_file)
+    write_jsonl(docs, output_file)

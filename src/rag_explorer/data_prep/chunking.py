@@ -1,10 +1,8 @@
 """Break the text into chunks with Langchain."""
 
-import json
-
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from .ingest import common
+from .jsonl import read_jsonl, write_jsonl
 from .schema import CHUNK_FIELDS, validate
 
 
@@ -58,13 +56,8 @@ def chunk_all(
     """
     chunks = []
     for path in input_files:
-        with open(path, encoding="utf-8") as f:
-            for line in f:
-                chunks.extend(
-                    chunk_doc(
-                        line=json.loads(line),
-                        chunk_size=chunk_size,
-                        chunk_overlap=chunk_overlap,
-                    )
-                )
-    common.write_jsonl(chunks, output_file)
+        for doc in read_jsonl(path):
+            chunks.extend(
+                chunk_doc(line=doc, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+            )
+    write_jsonl(chunks, output_file)

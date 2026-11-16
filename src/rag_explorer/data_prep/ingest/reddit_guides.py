@@ -3,6 +3,7 @@
 import re
 from pathlib import Path
 
+from .. import jsonl
 from . import common
 
 
@@ -11,7 +12,7 @@ def ingest_guides(input_dir: str, output_file: str):
 
     Each ``*.txt`` file has the source URL on its first line and the body after.
     Files with an empty body are skipped. The title is the filename.
-    The source is the subreddit from the URL.
+    The source is the subreddit board from the URL.
 
     Args:
         input_dir (str): The directory containing the guide ``.txt`` files.
@@ -19,17 +20,13 @@ def ingest_guides(input_dir: str, output_file: str):
     """
     docs = []
     for f in sorted(Path(input_dir).glob("*.txt")):
-        print(Path(f).stem)
         url, _, body = f.read_text(encoding="utf-8").partition("\n")
-
         url, body = url.strip(), body.strip()
 
         if not body:
             continue
 
         sub = re.search(r"reddit\.com/r/([^/]+)", url)
-        print("sub", sub.group(1) if sub else "unknown")
-
         docs.append(
             common.make_doc(
                 title=Path(f).stem,
@@ -40,4 +37,4 @@ def ingest_guides(input_dir: str, output_file: str):
             ),
         )
 
-    common.write_jsonl(docs, output_file)
+    jsonl.write_jsonl(docs, output_file)

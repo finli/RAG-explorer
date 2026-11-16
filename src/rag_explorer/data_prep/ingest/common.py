@@ -7,7 +7,6 @@ time_utc, upvote, num_comments.
 
 import hashlib
 import html
-import json
 import re
 import unicodedata
 
@@ -56,18 +55,6 @@ def clean_field(field: str):
     field = re.sub(r"https?://\S+", "[URL]", field)  # take urls out of field
 
     return field
-
-
-def write_jsonl(docs: list[dict], output_file: str):
-    """Write docs to a JSON Lines file, one JSON object per line.
-
-    Args:
-        docs (list[dict]): The documents to write.
-        output_file (str): The path of the jsonl file to write.
-    """
-    with open(output_file, "w", encoding="utf-8") as out:
-        for doc in docs:
-            out.write(json.dumps(doc, ensure_ascii=False) + "\n")
 
 
 def _num(value, cast):
