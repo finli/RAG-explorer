@@ -60,4 +60,9 @@ def chunk_all(
             chunks.extend(
                 chunk_doc(line=doc, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
             )
+    if not chunks:
+        raise ValueError(
+            f"No chunks were produced from {input_files}: the files are empty "
+            "or every record has an empty 'post' field."
+        )
     write_jsonl(chunks, output_file)
