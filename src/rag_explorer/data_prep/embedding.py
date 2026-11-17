@@ -1,10 +1,12 @@
 """Embed data, store in FAISS index, store metadata in .json file."""
 
-import json
-
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
+
+from rag_explorer.data_prep.schema import VECTOR_FIELDS, validate
+
+from .jsonl import read_jsonl, write_jsonl
 
 
 def build_vector_index(
@@ -27,46 +29,47 @@ def build_vector_index(
     """
     # --- Create FAISS index (L2 or cosine)
     dim = embedding_model.get_embedding_dimension()
-
     index = faiss.IndexFlatIP(dim)
-
     metadata = []
 
     # --- Load chunked JSONL
-    with open(in_file) as f:
-        for vector_id, json_str in enumerate(f):
-            line = json.loads(json_str)
+    for line in read_jsonl(in_file):
+        text = line.get("text", "").strip()
+        if not text:
+            continue
 
-            text = line.get("post_chunk", "").strip()
-            if not text:
-                continue
+        # --- Embed
+        emb = embedding_model.encode(text)
+        emb = emb / np.linalg.norm(emb)  # normalize for cosine similarity
+        emb = np.array([emb], dtype="float32")
 
-            # --- Embed
-            emb = embedding_model.encode(text)
-            emb = emb / np.linalg.norm(emb)  # normalize for cosine similarity
-            emb = np.array([emb], dtype="float32")
+        # --- Store metadata; vector_id is the row of this vector in the FAISS index
+        record = {
+            "vector_id": index.ntotal,
+            "parent_id": line.get("parent_id"),
+            "title": line.get("title"),
+            "chunk_id": line.get("chunk_id"),
+            "text": text,
+            "source": line.get("source"),
+            "links": line.get("links"),
+            "doc_type": line.get("doc_type"),
+            "source_url": line.get("source_url"),
+            "time_utc": line.get("time_utc"),
+            "upvote": line.get("upvote"),
+            "num_comments": line.get("num_comments"),
+        }
+        validate(record=record, fields=VECTOR_FIELDS)
+        metadata.append(record)
 
-            # --- Add to FAISS
-            index.add(emb)
+        # --- Add to FAISS
+        index.add(emb)
 
-            # --- Store metadata
-            metadata.append(
-                {
-                    "vector_id": vector_id,
-                    "chunk_id": line.get("chunk_id"),
-                    "parent_id": line.get("parent_id"),
-                    "title": line.get("title"),
-                    "time_utc": line.get("time_utc"),
-                    "upvote": line.get("upvote"),
-                    "num_comments": line.get("num_comments"),
-                    "source": line.get("source"),
-                    "urls": line.get("urls"),
-                    "text": text,
-                }
-            )
+    if not metadata:
+        raise ValueError(
+            f"No text chunks were embedded from {in_file}: the file is empty "
+            "or every record has an empty 'text' field."
+        )
 
     # --- Save FAISS + metadata
     faiss.write_index(index, out_embedding)
-    with open(out_metadata, "w", encoding="utf-8") as out:
-        for doc in metadata:
-            out.write(json.dumps(doc, ensure_ascii=False) + "\n")
+    write_jsonl(metadata, out_metadata)

@@ -27,6 +27,7 @@ CHUNK_FIELDS = [
     "upvote",
     "num_comments",
 ]
+VECTOR_FIELDS = ["vector_id"] + CHUNK_FIELDS
 
 
 def validate(record: dict, fields: list[str]) -> None:
@@ -34,4 +35,6 @@ def validate(record: dict, fields: list[str]) -> None:
     if list(record) != fields:
         missing = set(fields) - set(record)
         extra = set(record) - set(fields)
-        raise ValueError(f"Schema mismatch: missing={missing}, extra={extra}")
+        raise ValueError(
+            f"Schema mismatch: missing={missing}, extra={extra}. Order matters."
+        )
