@@ -6,10 +6,9 @@ from sentence_transformers import SentenceTransformer
 
 from rag_explorer.data_prep import (
     build_vector_index,
-    clean,
-    remove_duplicates,
-    to_chunk,
+    chunk_all,
 )
+from rag_explorer.data_prep.ingest import ingest_guides, ingest_posts, remove_duplicates
 from rag_explorer.rag import get_response, return_prompt
 from rag_explorer.vector_store import filter_results, load_faiss_index, retrieve
 
@@ -22,19 +21,25 @@ def prepare_data(
     This function checks whether intermediate folders are empty and performs
     the necessary processing steps only when required.
     """
-    # Deduplicate documents
-    if not Path("data/deduped.json").exists():
-        remove_duplicates(input_dir="data/raw/", output_file="data/deduped.jsonl")
+    # Ingest posts
+    if not Path("data/posts_deduped.json").exists():
+        remove_duplicates(
+            input_dir="data/raw/posts", output_file="data/posts_deduped.jsonl"
+        )
+    if not Path("data/posts_clean.jsonl").exists():
+        ingest_posts(
+            input_file="data/posts_deduped.jsonl", output_file="data/posts_clean.jsonl"
+        )
 
-    # Clean documents
-    if not Path("data/clean.jsonl").exists():
-        clean(input_file="data/deduped.jsonl", output_file="data/clean.jsonl")
+    # ingest guides
+    if not Path("data/guides_clean.jsonl").exists():
+        ingest_guides(input_dir="data/raw/wiki", output_file="data/guides_clean.jsonl")
 
     # Break documents into chunks
     if not Path("data/chunks.jsonl").exists():
-        to_chunk(
-            in_file="data/clean.jsonl",
-            out_file="data/chunks.jsonl",
+        chunk_all(
+            input_files=["data/posts_clean.jsonl", "data/guides_clean.jsonl"],
+            output_file="data/chunks.jsonl",
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
         )
